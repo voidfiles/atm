@@ -23,7 +23,8 @@ setup(
     zip_safe = False,
     install_requires = [
         "boto",
-        "requests"
+        "requests",
+        "redis",
     ],
     tests_require = []
 )

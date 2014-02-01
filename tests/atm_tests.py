@@ -1,19 +1,19 @@
+import os
 import unittest
 from hashlib import sha1
 import time
 import shutil
 import requests
-import time
 
-from atm import ATM 
+from atm import ATM
 from atm.s3 import is_s3_uri, parse_s3_uri
 
 url = 'http://www.google.com'
 url2 = 'http://www.nytimes.com'
 local_cache_dir = 'cache-atm-tests-12345678910'
-s3_cache_dir = 's3://atm-test-bucket/cache/'
+s3_cache_dir = os.getenv('TEST_S3_CACHE_DIR', 's3://atm-test-bucket/cache/')
 s3_file = 'http://atm-test-bucket.s3.amazonaws.com/fixtures/foo.txt'
-s3_bucket = "atm-test-bucket"
+s3_bucket = os.getenv('TEST_S3_BUCKET', "atm-test-bucket")
 s3_path = "cache/"
 
 class ATMTests(unittest.TestCase):
@@ -69,7 +69,7 @@ class ATMTests(unittest.TestCase):
     # remove cache directory
     shutil.rmtree(local_cache_dir)
 
-    assert len(statement) == 2 
+    assert len(statement) == 2
 
   def test_local_default(self):
     teller = ATM(local_cache_dir)
@@ -100,7 +100,7 @@ class ATMTests(unittest.TestCase):
     r = teller.get_cache(url)
 
     statement = teller.statement()
-    
+
     # remove cache directory
     shutil.rmtree(local_cache_dir)
 
@@ -111,7 +111,7 @@ class ATMTests(unittest.TestCase):
     teller = ATM(s3_cache_dir)
     r = teller.get_cache(url)
     r = teller.get_cache(url2)
-    
+
     assets = [f for f in teller.liquidate()]
 
     # remove files
@@ -130,7 +130,7 @@ class ATMTests(unittest.TestCase):
     # remove files
     teller.default()
 
-    assert len(statement) == 2 
+    assert len(statement) == 2
 
   def test_s3_default(self):
     teller = ATM(s3_cache_dir)
@@ -152,7 +152,7 @@ class ATMTests(unittest.TestCase):
 
   def test_s3_interval(self):
     teller = ATM(s3_cache_dir, interval=10)
-    
+
     # remove cache directory
     teller.default()
 
@@ -182,8 +182,4 @@ class ATMTests(unittest.TestCase):
     teller.default()
 
     assert source1=="url" and source2=="cache"
-
-
-
-
 
